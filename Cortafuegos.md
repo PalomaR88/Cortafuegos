@@ -75,3 +75,88 @@ El filtrado de paquetes puede realizarse utilizando parámetros dela diferentes 
     * Difícil de implementar de forma segura
 
 
+## Elementos de iptables
+- Modulo del kérnel linux
+- Herramientas del espacio de usuario:
+    * Paquetes iptables
+    * CLI
+- Se pueden hacer las siguientes clasificación del tipo de tráfico:
+    * Entrante con destino el equipo
+    * Saliente, originado en el equipo
+    * Que atraviesa el equipo (entra por una interfaz de red y sale por otra)
+- Esto, junto a lo que queramos hacer, nos permite agrupar las regas en iptables.
+- Existen diferentes tablas (tables) dentro de las cuales peude haber varias cadenas (chains).
+- Cada cadena conssite en una lista de reglas con las que se comparan los paquetes que pasan por el cortafuegos. Las reglas específicas quñe se hace por los paquetes que se ajustan a ellas (target): DROP o ACCEPT.
+- Las reglas se van evaluando secuenciamente, hasya que el paquete se ajusta a una de ella. Si se llega a final, se ejecuta la política por defecto.
+
+>Ejemplo: Regla para aceptar peticiones tcp en el destino 172.22.0.200 en el puerto destino 80 y la interfaz eth0:
+-s/--sport: puerto de origen. Esto es un número alto aleatorio.
+-d/--dport: puerto de destino
+-o: se puede poner la interfaz
+
+~~~
+INPUT -p tcp
+    -d 172.22.0.200
+    --dport 80
+    -o eth0
+    -j ACCEPT
+~~~
+
+> Regla para permitir que cualquier máquina de fuera pueda acceder a nuestro servido web:
+~~~
+INPUT -tcp
+    --dport 80
+    -i eth0 --> esto indica la interfaz de salida.
+~~~
+
+~~~
+OUTPUT -p tcp
+    --sport 80
+    -o eth0
+    -j ACCEPT
+~~~
+
+## Tabla filter:filtro de paquetes
+Contiene 3 chains predefinidas:
+- INPUT: se consulta par alos paquetes que van dirigidos al propio cortafuegos.
+- OUTPUT: PAra paquetes generados localmente.
+- FORWARD: La atraviesan los paquetes enrutados a través de esta máquina, es decir, aquellos paquetes en los que el orgien y el destino son equpos de redes diferentes. 
+
+## Establecimiento de una política por defecto
+~~~
+iptables [-t tabla] -P cadena ACCEPT|DROP
+~~~
+
+Establece el taget que se ejecutará para los paquetes que no cumplan con ninguna regla de la chain especificada.
+
+En este apartado utilizamos la tabla filter que es la tabla por defecto y por tanto no es necesario especificarlo.
+
+~~~
+iptables -L -nv
+~~~
+-L: listar
+-n: aparece el número del puerto, no el servicio.
+-v: verbose. 
+
+1. Limpieza de las reglas previas
+~~~
+iptables -F
+iptables -t nat -F
+iptables -Z ---> pone los contadores a 0
+iptables -t nat -Z
+~~~
+
+2. Permitir ssh
+~~~
+iptables -A INPUT -s 172.22.0.0/16 -p tcp --dport 22 -jACCEPT
+iptables -A OUTPUT -d 172.22.0.0/16 -p tcp --dport 22 -j ACCEPT
+~~~
+
+3. Política por defecto
+~~~
+iptables -p INPUT DROP
+iptables -p OUTPUT DROP
+~~~
+
+
+
