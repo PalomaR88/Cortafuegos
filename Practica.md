@@ -2,7 +2,7 @@
 Vamos a realizar los primeros pasos para implementar un cortafuegos en un nodo de una red, aquel que se ejecuta en el propio equipo que trata de proteger, lo que a veces se denomina un cortafuegos personal.
 
 
-## Esquema de redPermalink
+## Esquema de red
 Vamos a utilizar una máquina en openstack, que vamos a crear con la receta heat: escenario1.yaml. La receta heat ha deshabilitado el cortafuego que nos ofrece openstack (todos los puertos de todos los protocolos están abiertos). La máquina creada tendrá un servidor web instalado. Vamos a trabajar con la red de las ips flotantes: 172.22.0.0/16.
 
 
@@ -34,6 +34,8 @@ Cómo estamos conectado a la máquina por ssh, vamos a permitir la conexión ssh
 ~~~
 iptables -A INPUT -s 172.22.0.0/16 -p tcp --dport 22 -j ACCEPT
 iptables -A OUTPUT -d 172.22.0.0/16 -p tcp --sport 22 -j ACCEPT
+iptables -A INPUT -s 172.23.0.0/16 -p tcp --dport 22 -j ACCEPT
+iptables -A OUTPUT -d 172.23.0.0/16 -p tcp --sport 22 -j ACCEPT
 ~~~
 
 Lista prueba iptable:
@@ -289,7 +291,41 @@ root@maquina:/home/debian# iptables -I INPUT -p tcp --dport 443 -d  172.22.7.88 
 ~~~
 
 
-    Permite hacer consultas DNS sólo al servidor 192.168.202.2. Comprueba que no puedes hacer un dig @1.1.1.1.
-    No permitir el acceso al servidor web de www.josedomingo.org (Tienes que utilizar la ip). ¿Puedes acceder a fp.josedomingo.org?
-    Permite mandar un correo usando nuestro servidor de correo: babuino-smtp. Para probarlo ejecuta un telnet bubuino-smtp.gonzalonazareno.org 25.
-    Instala un servidor mariadb, y permite los accesos desde la ip de tu cliente. Comprueba que desde otro cliente no se puede acceder.
+**3. Permite hacer consultas DNS sólo al servidor 192.168.202.2. Comprueba que no puedes hacer un dig @1.1.1.1.**
+
+Primero hay que eliminar la regla que lo acepta todo:
+~~~
+iptables -D INPUT 7
+iptables -D OUTPUT 7
+~~~
+
+Y se añade la siguiente regla para que solo permita a la ip correspondiente:
+~~~
+iptables -A OUTPUT -o eth0 -p udp --dport 53 -d 192.168.202.2 -j ACCEPT
+iptables -A INPUT -i eth0 -p udp --sport 53 -s 192.168.202.2 -j ACCEPT
+~~~
+
+
+
+**4. No permitir el acceso al servidor web de www.josedomingo.org (Tienes que utilizar la ip). ¿Puedes acceder a fp.josedomingo.org?**
+************VOY POR AQUÍ
+137.74.161.90
+---probar si es esto
+iptables -I INPUT -i eth0 -p tcp --dport 443 -s 137.74.161.90 -j DROP
+
+iptables -I OUTPUT -o eth0 -p tcp --sport 443 -d  137.74.161.90 -j DROP
+
+
+
+iptables -I INPUT -i eth0 -p tcp --dport 80 -d  172.22.7.88 -j DROP
+
+iptables -I OUTPUT -o eth0 -p tcp --sport 80 -s 172.22.7.88 -j DROP
+
+
+
+
+
+
+**5. Permite mandar un correo usando nuestro servidor de correo: babuino-smtp. Para probarlo ejecuta un telnet bubuino-smtp.gonzalonazareno.org 25.**
+
+**6. Instala un servidor mariadb, y permite los accesos desde la ip de tu cliente. Comprueba que desde otro cliente no se puede acceder.**
