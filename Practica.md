@@ -340,3 +340,12 @@ Escape character is '^]'.
 
 
 **6. Instala un servidor mariadb, y permite los accesos desde la ip de tu cliente. Comprueba que desde otro cliente no se puede acceder.**
+
+sudo iptables -A INPUT -i eth0 -p tcp --dport 3306 -s 172.22.200.124 -j ACCEPT
+sudo iptables -A OUTPUT -o eth0 -p tcp --sport 3306 -d 172.22.200.124 -j ACCEPT
+
+~~~
+root@maquina:/home/debian# sudo iptables -A INPUT -i eth0 -p tcp --dport 3306 -s 172.22.200.124 -j ACCEPT
+root@maquina:/home/debian# sudo iptables -A OUTPUT -o eth0 -p tcp --sport 3306 -d 172.22.200.124 -j ACCEPT
+~~~
+
