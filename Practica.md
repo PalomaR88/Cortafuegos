@@ -279,22 +279,22 @@ paloma@coatlicue:~$
 
 **2. Deniega el acceso a tu servidor web desde una ip concreta.**
 
-iptables -I INPUT -i eth0 -p tcp --dport 80 -d  172.22.7.88 -j DROP
+iptables -I INPUT -i eth0 -p tcp --sport 80 -s  172.22.7.88 -j DROP
 
-iptables -I OUTPUT -o eth0 -p tcp --sport 80 -s 172.22.7.88 -j DROP
+iptables -I OUTPUT -o eth0 -p tcp --dport 80 -d 172.22.7.88 -j DROP
 
 ~~~
-root@maquina:/home/debian# iptables -I INPUT -p tcp --dport 80 -d  172.22.7.88 -j DROP
-root@maquina:/home/debian# iptables -I OUTPUT -p tcp --sport 80 -s 172.22.7.88 -j DROP
-root@maquina:/home/debian# iptables -I OUTPUT -p tcp --sport 443 -s 172.22.7.88 -j DROP
-root@maquina:/home/debian# iptables -I INPUT -p tcp --dport 443 -d  172.22.7.88 -j DROP
+root@maquina:/home/debian# iptables -I INPUT -p tcp --sport 80 -s  172.22.7.88 -j DROP
+root@maquina:/home/debian# iptables -I OUTPUT -p tcp --dport 80 -d 172.22.7.88 -j DROP
+root@maquina:/home/debian# iptables -I OUTPUT -p tcp --dport 443 -d 172.22.7.88 -j DROP
+root@maquina:/home/debian# iptables -I INPUT -p tcp --sport 443 -s  172.22.7.88 -j DROP
 ~~~
 
 
 **3. Permite hacer consultas DNS sólo al servidor 192.168.202.2. Comprueba que no puedes hacer un dig @1.1.1.1.**
 
 Primero hay que eliminar la regla que lo acepta todo:
-~~~
+~~~ 
 iptables -D INPUT 7
 iptables -D OUTPUT 7
 ~~~
@@ -308,24 +308,35 @@ iptables -A INPUT -i eth0 -p udp --sport 53 -s 192.168.202.2 -j ACCEPT
 
 
 **4. No permitir el acceso al servidor web de www.josedomingo.org (Tienes que utilizar la ip). ¿Puedes acceder a fp.josedomingo.org?**
-************VOY POR AQUÍ
-137.74.161.90
----probar si es esto
-iptables -I INPUT -i eth0 -p tcp --dport 443 -s 137.74.161.90 -j DROP
 
-iptables -I OUTPUT -o eth0 -p tcp --sport 443 -d  137.74.161.90 -j DROP
+iptables -I INPUT -i eth0 -p tcp --sport 80 -s 137.74.161.90 -j DROP
 
+iptables -I INPUT -i eth0 -p tcp --sport 443 -s 137.74.161.90 -j DROP
 
-
-iptables -I INPUT -i eth0 -p tcp --dport 80 -d  172.22.7.88 -j DROP
-
-iptables -I OUTPUT -o eth0 -p tcp --sport 80 -s 172.22.7.88 -j DROP
-
-
-
+~~~
+root@maquina:/home/debian# iptables -I OUTPUT -o eth0 -p tcp --dport 80 -d  137.74.161.90 -j DROP
+root@maquina:/home/debian# iptables -I OUTPUT -o eth0 -p tcp --dport 443 -d  137.74.161.90 -j DROP
+root@maquina:/home/debian# iptables -I INPUT -i eth0 -p tcp --sport 80 -s 137.74.161.90 -j DROP
+root@maquina:/home/debian# iptables -I INPUT -i eth0 -p tcp --sport 443 -s 137.74.161.90 
+~~~
 
 
 
 **5. Permite mandar un correo usando nuestro servidor de correo: babuino-smtp. Para probarlo ejecuta un telnet bubuino-smtp.gonzalonazareno.org 25.**
+
+iptables -A INPUT -p tcp --sport 25 -s 192.168.203.3 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 25 -d 192.168.203.3 -j ACCEPT
+
+~~~
+root@maquina:/home/debian# iptables -A INPUT -p tcp --sport 25 -s 192.168.203.3 -j ACCEPT
+Connection closed by foreign host.
+root@maquina:/home/debian# iptables -A OUTPUT -p tcp --dport 25 -d 192.168.203.3 -j ACCEPT
+root@maquina:/home/debian# telnet babuino-smtp.gonzalonazareno.org 25
+Trying 192.168.203.3...
+Connected to babuino-smtp.gonzalonazareno.org.
+Escape character is '^]'.
+220 babuino-smtp.gonzalonazareno.org ESMTP Postfix (Debian/GNU)
+~~~
+
 
 **6. Instala un servidor mariadb, y permite los accesos desde la ip de tu cliente. Comprueba que desde otro cliente no se puede acceder.**
