@@ -12,3 +12,5 @@
 #### 3.2. [Elementos de iptables](https://github.com/PalomaR88/Cortafuegos/blob/master/Cortafuegos.md#elementos-de-iptables)
 #### 3.3. [Tabla filter: filtro de paquetes](https://github.com/PalomaR88/Cortafuegos/blob/master/Cortafuegos.md#tabla-filterfiltro-de-paquetes)
 #### 3.4. [Establecimiento de un política por defecto](https://github.com/PalomaR88/Cortafuegos/blob/master/Cortafuegos.md#establecimiento-de-una-pol%C3%ADtica-por-defecto)
+--------------------------------------------------------------------------------------
+## 4. [Practicas](https://github.com/PalomaR88/Cortafuegos/blob/master/Practica.md)
