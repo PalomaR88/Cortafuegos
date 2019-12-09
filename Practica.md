@@ -211,7 +211,7 @@ Se restaura Apache:
 ~~~
 root@maquina:/home/debian# systemctl restart apache2.service
 ~~~
-![imagenApache](aimg.png)
+![imagenApache](./images/aimg.png)
 
 
 ## Configuración en un solo paso
